@@ -14,6 +14,11 @@
 5. On load, `shows first video`
 6. `Next js` and `Tailwind CSS` used for project
 
+------------------------------------------------
+
+1. No external library is used for video player but used , default video Player
+2. Used react-dnd library for reordering or shuffling the videos in playlist
+
 ## Project Structure
 
 1. `app` root directory
