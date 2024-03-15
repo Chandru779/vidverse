@@ -1,3 +1,5 @@
+#### Deployed on vercel [https://vidverse.vercel.app/](https://vidverse.vercel.app/)
+
 ## Instructions
 
 1. git clone [https://github.com/Chandru779/vidverse.git](https://github.com/Chandru779/vidverse.git) 
