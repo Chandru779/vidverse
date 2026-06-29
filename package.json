@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "fetch-thumbnails": "node scripts/fetch-thumbnails.mjs"
   },
   "dependencies": {
     "@tailwindcss/line-clamp": "^0.4.4",

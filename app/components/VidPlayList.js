@@ -1,175 +1,199 @@
 "use client";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { baseUrl, mediaJSON } from "../../config/config";
-import update from "immutability-helper";
+import { getThumbUrl, getVideoId, getYouTubeThumbUrl } from "../../config/config";
 import { useDrag, useDrop } from "react-dnd";
 import { FiSearch } from "react-icons/fi";
 import { GrDrag } from "react-icons/gr";
-import Image from "next/image";
-import { debounce } from "../../utils";
+
+function moveItem(list, dragIndex, hoverIndex) {
+  const next = [...list];
+  const [removed] = next.splice(dragIndex, 1);
+  next.splice(hoverIndex, 0, removed);
+  return next;
+}
 
 const PlayListCard = ({
   video,
   index,
-  id,
   moveCard,
   setSelectedVideo,
   selectedVideo,
+  isDragEnabled,
 }) => {
   const ref = useRef(null);
+  const videoId = getVideoId(video);
+  const [thumbSrc, setThumbSrc] = useState(() => getThumbUrl(video));
+
+  useEffect(() => {
+    setThumbSrc(getThumbUrl(video));
+  }, [video]);
 
   const [{ handlerId }, drop] = useDrop({
     accept: "card",
+    canDrop: () => isDragEnabled,
     collect(monitor) {
       return {
         handlerId: monitor.getHandlerId(),
       };
     },
     hover(item, monitor) {
-      if (!ref.current) {
-        return;
-      }
+      if (!ref.current || !isDragEnabled) return;
+
       const dragIndex = item.index;
       const hoverIndex = index;
-      // Don't replace items with themselves
-      if (dragIndex === hoverIndex) {
-        return;
-      }
-      // Determine rectangle on screen
-      const hoverBoundingRect = ref.current?.getBoundingClientRect();
-      // Get vertical middle
+      if (dragIndex === hoverIndex) return;
+
+      const hoverBoundingRect = ref.current.getBoundingClientRect();
       const hoverMiddleY =
         (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-      // Determine mouse position
       const clientOffset = monitor.getClientOffset();
-      // Get pixels to the top
+      if (!clientOffset) return;
+
       const hoverClientY = clientOffset.y - hoverBoundingRect.top;
-      // Only perform the move when the mouse has crossed half of the items height
-      // When dragging downwards, only move when the cursor is below 50%
-      // When dragging upwards, only move when the cursor is above 50%
-      // Dragging downwards
-      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
-        return;
-      }
-      // Dragging upwards
-      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
-        return;
-      }
-      // Time to actually perform the action
+      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) return;
+      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) return;
+
       moveCard(dragIndex, hoverIndex);
-      // Note: we're mutating the monitor item here!
-      // Generally it's better to avoid mutations,
-      // but it's good here for the sake of performance
-      // to avoid expensive index searches.
       item.index = hoverIndex;
     },
   });
 
   const [{ isDragging }, drag] = useDrag({
     type: "card",
-    item: () => {
-      return { id, index };
-    },
+    canDrag: () => isDragEnabled,
+    item: () => ({ id: videoId, index }),
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
   });
 
-  // const opacity = isDragging ? 0 : 1;
-  drag(drop(ref));
+  if (isDragEnabled) {
+    drag(drop(ref));
+  }
+
   return (
     <div
       ref={ref}
-      key={video.thumb}
       data-handler-id={handlerId}
       onClick={() => setSelectedVideo(video)}
-      className={`p-2 flex gap-4 cursor-pointer border-b-2 last:border-b-0 border-semiwhite/10  hover:opacity-80  ${
-        selectedVideo?.thumb == video?.thumb ? "bg-black" : "bg-navy/15"
+      style={{ opacity: isDragging ? 0.4 : 1 }}
+      className={`p-2 flex gap-4 cursor-pointer border-b-2 last:border-b-0 border-semiwhite/10 hover:opacity-80 ${
+        getVideoId(selectedVideo) === videoId ? "bg-black" : "bg-navy/15"
       }`}
     >
       <div
-        title="Drag and drop on any element you want swap"
-        className="hover:cursor-move flex-shrink-0 self-center"
+        title={
+          isDragEnabled
+            ? "Drag and drop to reorder"
+            : "Clear search to reorder playlist"
+        }
+        onClick={(e) => e.stopPropagation()}
+        className={`flex-shrink-0 self-center ${
+          isDragEnabled ? "hover:cursor-move" : "opacity-30 cursor-not-allowed"
+        }`}
       >
         <GrDrag className="w-5 h-5 opacity-50" />
       </div>
-      {/* <div className="w-1/4 h-auto rounded-lg relative bg-red-200">
-      <Image
-        src={baseUrl + video.thumb}
-        fill
-        className="h-full w-full bg-blue-100"
+      <img
+        src={thumbSrc}
+        alt={video.title}
+        className="w-1/4 aspect-video rounded-md object-cover bg-black/30"
+        onError={() => {
+          const fallback = getYouTubeThumbUrl(video.youtubeId);
+          if (fallback && thumbSrc !== fallback) setThumbSrc(fallback);
+        }}
       />
-      </div> */}
-      <img src={baseUrl + video.thumb} className="w-1/4 h-auto rounded-md" />
-      <div className="flex flex-col gap-1 overflow-hidden pr-2 justify-between py-2">
+      <div className="flex flex-col gap-1 overflow-hidden pr-2 justify-between py-2 min-w-0 flex-1">
         <div>
-          <p className=" font-medium text-lg  truncate">{video?.title}</p>
-          <p className=" font-medium text-xs ">{video?.subtitle}</p>
+          <p className="font-medium text-lg truncate">{video?.title}</p>
+          <p className="font-medium text-xs">{video?.subtitle}</p>
         </div>
-        <p className=" text-xs truncate text-semiwhite/70">
-          {video?.description}
-        </p>
+        <p className="text-xs truncate text-semiwhite/70">{video?.description}</p>
       </div>
     </div>
   );
 };
 
 export const VidPlayList = ({ setSelectedVideo, selectedVideo }) => {
-  let videos = mediaJSON.categories[0].videos;
-  const [videoList, setVideoList] = useState(videos);
+  const [orderedVideos, setOrderedVideos] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const filterVideosBySearchTerm = (val, videos) => {
-    console.log(val,videos)
-    return videos.filter((video) =>
-      video?.title?.toLowerCase().includes(val.toLowerCase())
-    );
-  };
+  useEffect(() => {
+    let cancelled = false;
 
-  // let debounceResult = debounce(filterVideosBySearchTerm, 500);
+    async function loadVideos() {
+      try {
+        setLoading(true);
+        setError("");
+        const res = await fetch("/api/videos");
+        if (!res.ok) throw new Error("Failed to load videos");
+        const data = await res.json();
+        const videos = data?.categories?.[0]?.videos ?? [];
+        if (!cancelled) {
+          setOrderedVideos(videos);
+          if (videos[0]) setSelectedVideo(videos[0]);
+        }
+      } catch (err) {
+        if (!cancelled) setError(err.message || "Failed to load videos");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    loadVideos();
+    return () => {
+      cancelled = true;
+    };
+  }, [setSelectedVideo]);
+
+  const isDragEnabled = !searchQuery.trim();
+
+  const videoList = searchQuery.trim()
+    ? orderedVideos.filter((video) =>
+        video.title.toLowerCase().includes(searchQuery.trim().toLowerCase())
+      )
+    : orderedVideos;
 
   const handleSearch = (e) => {
-    let val = e.target.value;
-    if (val) {
-      let filteredvideos = filterVideosBySearchTerm(val, videos);
-      // let filteredvideos = debounceResult(val, videos);
-      console.log("filteredvideos", filteredvideos);
-      setVideoList(filteredvideos);
-    } else {
-      setVideoList(videos);
-    }
+    setSearchQuery(e.target.value);
   };
 
   const moveCard = useCallback((dragIndex, hoverIndex) => {
-    setVideoList((prevCards) =>
-      update(prevCards, {
-        $splice: [
-          [dragIndex, 1],
-          [hoverIndex, 0, prevCards[dragIndex]],
-        ],
-      })
-    );
+    setOrderedVideos((prev) => moveItem(prev, dragIndex, hoverIndex));
   }, []);
 
   const renderCard = useCallback(
-    (video, index) => {
-      return (
-        <PlayListCard
-          video={video}
-          key={video.thumb}
-          index={index}
-          id={video.thumb}
-          moveCard={moveCard}
-          setSelectedVideo={setSelectedVideo}
-          selectedVideo={selectedVideo}
-        />
-      );
-    },
-    [selectedVideo]
+    (video, index) => (
+      <PlayListCard
+        video={video}
+        key={getVideoId(video)}
+        index={index}
+        moveCard={moveCard}
+        setSelectedVideo={setSelectedVideo}
+        selectedVideo={selectedVideo}
+        isDragEnabled={isDragEnabled}
+      />
+    ),
+    [moveCard, selectedVideo, setSelectedVideo, isDragEnabled]
   );
 
-  useEffect(() => {
-    setSelectedVideo(videoList[0]);
-  }, []);
+  if (loading) {
+    return (
+      <div className="flex flex-col gap-4 w-[100%] lg:w-[30%] text-semiwhite px-2">
+        <p className="p-4 text-semiwhite/70">Loading playlist...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col gap-4 w-[100%] lg:w-[30%] text-semiwhite px-2">
+        <p className="p-4 text-tomato">{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4 w-[100%] lg:w-[30%] text-semiwhite h-100 overflow-auto sm:overflow-visible lg:overflow-auto px-2">
@@ -177,7 +201,8 @@ export const VidPlayList = ({ setSelectedVideo, selectedVideo }) => {
         <section className="flex w-full h-10 px-3 md:px-5 py-3 gap-4 items-center bg-transparent border-2 border-semiwhite/10 rounded">
           <input
             type="search"
-            className="outline-none bg-transparent w-full font-normal text-semiwhite text-sm md:text-md "
+            value={searchQuery}
+            className="outline-none bg-transparent w-full font-normal text-semiwhite text-sm md:text-md"
             placeholder="Enter keywords to search videos ..."
             onChange={handleSearch}
           />
@@ -185,7 +210,7 @@ export const VidPlayList = ({ setSelectedVideo, selectedVideo }) => {
         </section>
       </div>
       <div className="h-full overflow-auto rounded-md border-2 border-semiwhite/10">
-        {videoList?.length ? (
+        {videoList.length ? (
           videoList.map((video, i) => renderCard(video, i))
         ) : (
           <p className="p-2">No videos were found for your search.</p>

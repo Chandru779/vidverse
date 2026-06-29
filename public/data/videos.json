@@ -1,0 +1,89 @@
+{
+  "categories": [
+    {
+      "name": "Movies",
+      "videos": [
+        {
+          "id": "big-buck-bunny",
+          "title": "Big Buck Bunny",
+          "subtitle": "Blender Foundation",
+          "description": "A giant rabbit with a heart bigger than himself takes comical revenge on three rude rodents. Classic open-source animation from the Blender Foundation.",
+          "type": "youtube",
+          "sources": ["https://www.youtube.com/watch?v=YE7VzlLtp-4"],
+          "thumb": "/images/thumbs/big-buck-bunny.jpg",
+          "youtubeId": "YE7VzlLtp-4"
+        },
+        {
+          "id": "sintel",
+          "title": "Sintel",
+          "subtitle": "Blender Foundation",
+          "description": "An independently produced short fantasy film by the Blender Foundation, following a girl searching for her lost dragon companion.",
+          "type": "youtube",
+          "sources": ["https://www.youtube.com/watch?v=eRsGyueVLvQ"],
+          "thumb": "/images/thumbs/sintel.jpg",
+          "youtubeId": "eRsGyueVLvQ"
+        },
+        {
+          "id": "tears-of-steel",
+          "title": "Tears of Steel",
+          "subtitle": "Blender Foundation",
+          "description": "A compelling sci-fi short film realized with crowd-funding, testing a complete open and free pipeline for visual effects.",
+          "type": "youtube",
+          "sources": ["https://www.youtube.com/watch?v=R6MlUcmOul8"],
+          "thumb": "/images/thumbs/tears-of-steel.jpg",
+          "youtubeId": "R6MlUcmOul8"
+        },
+        {
+          "id": "elephants-dream",
+          "title": "Elephants Dream",
+          "subtitle": "Blender Foundation",
+          "description": "The first Blender Open Movie from 2006 — a surreal journey through a strange machine world.",
+          "type": "youtube",
+          "sources": ["https://www.youtube.com/watch?v=TLkA0RELQ1g"],
+          "thumb": "/images/thumbs/elephants-dream.jpg",
+          "youtubeId": "TLkA0RELQ1g"
+        },
+        {
+          "id": "me-at-the-zoo",
+          "title": "Me at the zoo",
+          "subtitle": "jawed",
+          "description": "The first video ever uploaded to YouTube, recorded at the San Diego Zoo in 2005.",
+          "type": "youtube",
+          "sources": ["https://www.youtube.com/watch?v=jNQXAC9IVRw"],
+          "thumb": "/images/thumbs/me-at-the-zoo.jpg",
+          "youtubeId": "jNQXAC9IVRw"
+        },
+        {
+          "id": "keyboard-cat",
+          "title": "Keyboard Cat",
+          "subtitle": "Keyboard Cat",
+          "description": "The iconic viral video of a cat playing keyboard — one of the earliest internet memes.",
+          "type": "youtube",
+          "sources": ["https://www.youtube.com/watch?v=J---aiyznGQ"],
+          "thumb": "/images/thumbs/keyboard-cat.jpg",
+          "youtubeId": "J---aiyznGQ"
+        },
+        {
+          "id": "gangnam-style",
+          "title": "Gangnam Style",
+          "subtitle": "PSY",
+          "description": "The record-breaking K-pop music video that became the first YouTube video to reach one billion views.",
+          "type": "youtube",
+          "sources": ["https://www.youtube.com/watch?v=9bZkp7q19f0"],
+          "thumb": "/images/thumbs/gangnam-style.jpg",
+          "youtubeId": "9bZkp7q19f0"
+        },
+        {
+          "id": "darude-sandstorm",
+          "title": "Darude - Sandstorm",
+          "subtitle": "Darude",
+          "description": "The legendary electronic dance track and its official music video, a staple of internet culture.",
+          "type": "youtube",
+          "sources": ["https://www.youtube.com/watch?v=y6120QOlsfU"],
+          "thumb": "/images/thumbs/darude-sandstorm.jpg",
+          "youtubeId": "y6120QOlsfU"
+        }
+      ]
+    }
+  ]
+}
